@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Daily Self Portrait</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="cam_selfie">Self Portrait</string>
+    <string name="action_settings">Alarm Settings</string>
+    <string name="notification_title">Daily Self Portrait</string>
+    <string name="notification_text">Time for another self portrait</string>
+    <string name="action_ok">Close</string>
+    <string name="message_no_external_storage">External storage unavailable</string>
+    <string name="message_reminder_stopped">Selfie reminder stopped</string>
+    <string name="message_reminder_started">Selfie reminder started</string>
+    <string name="action_stop_alarm">Stop reminder</string>
+    <string name="action_start_alarm">Start reminder</string>
+
+
+</resources>

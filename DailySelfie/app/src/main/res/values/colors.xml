@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="indigo_primary">#3F51B5</color>
+    <color name="indigo_light">#C5CAE9</color>
+    <color name="indigo_dark">#303F9F</color>
+    <color name="blue_grey_light">#ECEFF1</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="apptheme_color">#3f51b5</color>
+    <color name="color5_lavendar">#B7B1D1</color>
+    <color name="color5_yellow">#F6E870</color>
+    <color name="color5_cyan">#90C9AB</color>
+    <color name="color5_salmon">#EB8D78</color>
+    <color name="color5_teal">#276F97</color>
+
+    <color name="grid_state_pressed">#1Affffff</color>
+    <color name="grid_state_focused">#80000000</color>
+
+</resources>
