@@ -1,6 +1,5 @@
 package com.nsci_consulting.www.dailyselfie;
 
-//import android.support.v7.app.ActionBarActivity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -15,18 +14,24 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+/*
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.view.View;
+import android.widget.AdapterView;
+import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
+*/
 
 public class MainActivity extends AppCompatActivity {
     static final int REQUEST_TAKE_PHOTO = 1;
@@ -46,39 +51,23 @@ public class MainActivity extends AppCompatActivity {
     private PendingIntent alarmIntent;
     private File pictureDirectory;
 
+    private MainActivityFragment mMainActivityFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-        lv = (ListView) findViewById(R.id.listselfies);
+        mMainActivityFragment = new MainActivityFragment();
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction().add(R.id.selfie_thumb_container, mMainActivityFragment).commit();
+        }
+
+//        lv = (ListView) findViewById(R.id.listselfies);
         // load pictures in ArrayList
         pictureDirectory = getApplicationContext().getExternalFilesDir(null);
 
-        if(pictureDirectory == null){
-            Toast toast = Toast.makeText(this,getText(R.string.message_no_external_storage), Toast.LENGTH_LONG);
-            toast.show();
-            finish();
-        }
-        mPictureItems = getPictureItemsFromPath(pictureDirectory);
-
-        mAdapter = new CustomAdapter(mPictureItems,getApplicationContext());
-
-        lv.setAdapter(mAdapter);
-
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                PictureItem item = (PictureItem) adapterView.getItemAtPosition(i);
-                Uri mUri = Uri.parse(pictureDirectory + "/" + item.getName());
-
-                Intent mIntent = new Intent(getApplicationContext(), BigPictureActivity.class);
-                mIntent.putExtra("uri", mUri);
-                startActivity(mIntent);
-
-            }
-        });
 
         // set Alarm
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -93,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private void startAlarm(){
 
         // recurring every 2 Minutes
-        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (2*60*1000), 2*60*1000, alarmIntent);
+        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (2 * 60 * 1000), 2 * 60 * 1000, alarmIntent);
     }
 
 
@@ -118,19 +107,29 @@ public class MainActivity extends AppCompatActivity {
             // If the alarm has been set, cancel it.
             if (mAlarmManager!= null) {
                 mAlarmManager.cancel(alarmIntent);
-
                 Toast.makeText(getApplicationContext(),getText(R.string.message_reminder_stopped),Toast.LENGTH_SHORT).show();
             }
-
             return true;
         }
 
         if (id == R.id.action_start_reminder) {
-
             startAlarm();
             Toast.makeText(getApplicationContext(),getText(R.string.message_reminder_started),Toast.LENGTH_SHORT).show();
-
         }
+
+        if (id == R.id.action_delete_all_selfies) {
+            deleteAllSelfies();
+        }
+
+        if (id == R.id.action_delete_selfie) {
+            deleteSelfie();
+        }
+
+        if (id == R.id.action_ok) {
+            getFragmentManager().popBackStack();
+            return true;
+        }
+
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.cam_selfie) {
@@ -156,8 +155,10 @@ public class MainActivity extends AppCompatActivity {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
+//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
+                        Uri.fromFile(PictureHelper.getTempFile(this)));
+
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
@@ -166,11 +167,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-/*            Bundle extras = data.getExtras();
+/*
+            Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            mImageView.setImageBitmap(imageBitmap);*/
-            refreshPictures();
+            mImageView.setImageBitmap(imageBitmap);
+*/
+//            refreshPictures();
+//            galleryAddPic();
+
+            String selfieName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            PictureRecord newSelfie = new PictureRecord(selfieName, null);
+            newSelfie.setPictureBitmap(PictureHelper.getTempBitmap(this));
+            mMainActivityFragment.addSelfie(newSelfie);
+
+//            mMainActivityFragment.addSelfie(photoFile);
+
+
         }
+    }
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+        Log.v(TAG, "PictureWrite2Gallery");
+
     }
 
     private File createImageFile() throws IOException {
@@ -210,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
         return BitmapFactory.decodeFile(mCurrentPhotoPath.getPath(), bmOptions);
     }
 
+/*
     private void refreshPictures() {
 
         mPictureItems = getPictureItemsFromPath(pictureDirectory);
@@ -217,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
 
     }
+*/
 
     private ArrayList<PictureItem> getPictureItemsFromPath(File path){
 
@@ -238,5 +263,54 @@ public class MainActivity extends AppCompatActivity {
 
         return items;
     }
+
+    private void deleteAllSelfies() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getString(R.string.dialog_delete_all_selfies));
+        builder.setPositiveButton(getString(R.string.dialog_yes), dialogDeleteAllSelfiesClickListener);
+        builder.setNegativeButton(getString(R.string.dialog_no), dialogDeleteAllSelfiesClickListener).show();
+    }
+
+    private void deleteSelfie() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getString(R.string.dialog_delete_selfie));
+        builder.setPositiveButton(getString(R.string.dialog_yes), dialogDeleteSelfieClickListener);
+        builder.setNegativeButton(getString(R.string.dialog_no), dialogDeleteSelfieClickListener).show();
+    }
+    DialogInterface.OnClickListener dialogDeleteAllSelfiesClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+                    Toast.makeText(getApplicationContext(),getText(R.string.message_delete_all),Toast.LENGTH_SHORT).show();
+                    mMainActivityFragment.deleteAllSelfies();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        }
+    };
+
+    DialogInterface.OnClickListener dialogDeleteSelfieClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+                    Toast.makeText(getApplicationContext(),getText(R.string.message_delete_current),Toast.LENGTH_SHORT).show();
+                    mMainActivityFragment.deleteSelectedSelfie();
+
+                    getFragmentManager().popBackStack();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        }
+    };
 
 }
