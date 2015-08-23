@@ -48,11 +48,11 @@ public class MainActivity extends AppCompatActivity {
     private CustomAdapter mAdapter;
     public ArrayList<PictureItem> mPictureItems = new ArrayList<PictureItem>();
     private AlarmManager mAlarmManager;
-    private PendingIntent alarmIntent;
+    private PendingIntent mAlarmIntent;
+    private Intent mIntent;
     private File pictureDirectory;
 
     private MainActivityFragment mMainActivityFragment;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,23 +67,31 @@ public class MainActivity extends AppCompatActivity {
 //        lv = (ListView) findViewById(R.id.listselfies);
         // load pictures in ArrayList
         pictureDirectory = getApplicationContext().getExternalFilesDir(null);
+    }
 
-
-        // set Alarm
-        mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        // build pending intent to start AlarmReceiver
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
+    @Override
+    public void onBackPressed() {
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStackImmediate();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void startAlarm(){
 
-        // recurring every 2 Minutes
-        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (2 * 60 * 1000), 2 * 60 * 1000, alarmIntent);
+        // build pending intent to start AlarmReceiver
+        mIntent = new Intent(MainActivity.this, AlarmReceiver.class);
+        mAlarmIntent = PendingIntent.getBroadcast(MainActivity.this, 0, mIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        // instantiate Alarm
+        mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int interval = (2 * 60 * 1000);  // period for alarm in msec
+
+        // set alarm: recurring every 2 Minutes. Arguable whether alarm needs to wake the device.
+        mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + interval, interval, mAlarmIntent);
     }
-
-
 
 
     @Override
@@ -99,12 +107,10 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         if (id == R.id.action_stop_reminder) {
-
             // If the alarm has been set, cancel it.
             if (mAlarmManager!= null) {
-                mAlarmManager.cancel(alarmIntent);
+                mAlarmManager.cancel(mAlarmIntent);
                 Toast.makeText(getApplicationContext(),getText(R.string.message_reminder_stopped),Toast.LENGTH_SHORT).show();
             }
             return true;
@@ -129,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.cam_selfie) {
             dispatchTakePictureIntent();
@@ -150,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException ex) {
                 // Error occurred while creating the File
                 Log.e(TAG, "PictureStorageProblem");
-
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -180,8 +184,6 @@ public class MainActivity extends AppCompatActivity {
             mMainActivityFragment.addSelfie(newSelfie);
 
 //            mMainActivityFragment.addSelfie(photoFile);
-
-
         }
     }
 
@@ -192,7 +194,6 @@ public class MainActivity extends AppCompatActivity {
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
         Log.v(TAG, "PictureWrite2Gallery");
-
     }
 
     private File createImageFile() throws IOException {
@@ -276,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(getString(R.string.dialog_yes), dialogDeleteSelfieClickListener);
         builder.setNegativeButton(getString(R.string.dialog_no), dialogDeleteSelfieClickListener).show();
     }
+
     DialogInterface.OnClickListener dialogDeleteAllSelfiesClickListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {

@@ -46,4 +46,6 @@ public class BigPictureFragment extends Fragment {
         inflater.inflate(R.menu.menu_bigpicture, menu);
     }
 
+
+
 }
