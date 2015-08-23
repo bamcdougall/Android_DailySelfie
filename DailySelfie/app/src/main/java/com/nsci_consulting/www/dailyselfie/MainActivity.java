@@ -72,10 +72,8 @@ public class MainActivity extends AppCompatActivity {
         // set Alarm
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         // build pending intent to start AlarmReceiver
-        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-        alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
-
-        startAlarm();
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
     }
 
@@ -115,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_start_reminder) {
             startAlarm();
             Toast.makeText(getApplicationContext(),getText(R.string.message_reminder_started),Toast.LENGTH_SHORT).show();
+            return true;
         }
 
         if (id == R.id.action_delete_all_selfies) {
