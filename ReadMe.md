@@ -1,7 +1,7 @@
 ---
 title: "ReadMe for Android Project:  Daily Selfie"
 author: B.A. McDougall\footnote{NSCI Consulting, bamcdougall@nsci-consulting.com}
-date: "Wednesday, Aug 15, 2015"
+date: "Saturday, Aug 15, 2015"
 output: html_document
 ---
 
