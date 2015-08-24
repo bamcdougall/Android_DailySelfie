@@ -13,20 +13,23 @@ knit        : slidify::knit2slides
 
 ## Android Project - Daily Selfie
 
-### App provides graphic interface for dedicated link to MOMA.org
+### App provides user access to the camera application through the action bar.
 
-### App uses "Overflow Menu" with Menu to "More Information"
-* Provides user with options to open web browser that is linked to MOMA.org or cancel
-* UI provides thumb slider that changes color of non-white / non-grey shapes
-* Colors for transitions are randomly selected, but starting frame is recoverable
-* Color transitions are controlled by ObjectAnimator.ofObject and started by the SeekBar
+### App uses "Overflow Menu" to provide additional functionalities.
+There are 5 critical deliverables for this app:
 
-## Current Status of App
-* [Screen-capture](http://youtu.be/C0nIZTxgETQ) shows video of this Android App
+1.  Clicking camera icon opens picture taking app
+2.  Taking and accepting picture returns user to list of thumbnails for cumulative selfies
+3.  Clicking on thumbnail displays picture.  There must be method to return to list of thumbnails.
+4.  Cumulative list of selfies is stable between instances of the app. Optional and available:  delete selfie(s)
+5.  Repeating alarm reminds user to take selfie
 
 --- .class #id 
+## Current Status of App
+* [Screen-capture](https://youtu.be/J1baaWyhVvA) shows video of this Android App
+
 ## Future Improvements
-* Dynamically program shape sizes and shape placments based on screen size of host device
+* Elminate extraneous code
 
 ## Useful External Resource
-* [Android Holo Colors Generator](http://android-holo-colors.com/) creates drawable resources consistent with color branding of the developer
+* [Google Material Icons](https://www.google.com/design/icons/) provides icons for use as drawable resources.

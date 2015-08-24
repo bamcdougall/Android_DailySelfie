@@ -20,5 +20,6 @@
 ## Revision History
 ##
 ##      8/15/15: assembling elements of Repository for Daily Selfie Project
+##		8/23/15: Android project completed.  Respository is nearly completed
 ##      
 ################################################################################
